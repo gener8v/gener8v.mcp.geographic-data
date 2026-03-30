@@ -52,9 +52,54 @@ Add to your project's `.mcp.json`:
 }
 ```
 
-### SSE Transport
+### Hosted SSE (no install required)
 
-For HTTP-based clients:
+Connect any MCP-compatible client directly to the hosted server at `mcp.loc8n.com`. Pass your API key as a query parameter or `Authorization` header:
+
+```
+SSE endpoint: https://mcp.loc8n.com/sse?apiKey=YOUR_API_KEY
+```
+
+Or with a Bearer token:
+
+```
+GET https://mcp.loc8n.com/sse
+Authorization: Bearer YOUR_API_KEY
+```
+
+Each connection gets an isolated session — your API key is used for all requests and usage is tracked against your account.
+
+### Cursor
+
+Add to your Cursor MCP settings:
+
+```json
+{
+  "mcpServers": {
+    "geographic-data": {
+      "url": "https://mcp.loc8n.com/sse?apiKey=YOUR_API_KEY"
+    }
+  }
+}
+```
+
+### Windsurf
+
+Add to `~/.codeium/windsurf/mcp_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "geographic-data": {
+      "serverUrl": "https://mcp.loc8n.com/sse?apiKey=YOUR_API_KEY"
+    }
+  }
+}
+```
+
+### Self-Hosted SSE
+
+Run the server locally for development or custom deployments:
 
 ```bash
 mcp-geographic-data --transport sse --port 3100

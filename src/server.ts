@@ -123,14 +123,17 @@ export function createMcpServer(options: ServerOptions) {
 }
 
 export async function startServer(options: ServerOptions) {
-  const { server } = createMcpServer(options);
-
   if (options.transport === "stdio") {
+    const { server } = createMcpServer(options);
     const transport = new StdioServerTransport();
     await server.connect(transport);
   } else {
-    // SSE transport
-    let currentTransport: SSEServerTransport | null = null;
+    // SSE transport — multi-tenant: each connection gets its own
+    // MCP server instance keyed by the client's API key.
+    const sessions = new Map<
+      string,
+      { server: Server; transport: SSEServerTransport }
+    >();
 
     const httpServer = createServer(
       async (req: IncomingMessage, res: ServerResponse) => {
@@ -139,7 +142,10 @@ export async function startServer(options: ServerOptions) {
         // CORS headers
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-        res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+        res.setHeader(
+          "Access-Control-Allow-Headers",
+          "Content-Type, Authorization",
+        );
 
         if (req.method === "OPTIONS") {
           res.writeHead(204);
@@ -149,23 +155,62 @@ export async function startServer(options: ServerOptions) {
 
         if (url.pathname === "/health") {
           res.writeHead(200, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ status: "ok" }));
+          res.end(
+            JSON.stringify({ status: "ok", sessions: sessions.size }),
+          );
           return;
         }
 
         if (url.pathname === "/sse" && req.method === "GET") {
-          currentTransport = new SSEServerTransport("/messages", res);
-          await server.connect(currentTransport);
+          // API key from query param, Authorization header, or env fallback
+          const apiKey =
+            url.searchParams.get("apiKey") ??
+            extractBearerToken(req) ??
+            options.apiKey ??
+            process.env.LOC8N_API_KEY ??
+            "";
+
+          if (!apiKey) {
+            res.writeHead(401, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({
+                error: "AUTH_ERROR",
+                message:
+                  "API key required. Pass ?apiKey= query parameter or Authorization: Bearer header.",
+              }),
+            );
+            return;
+          }
+
+          const { server } = createMcpServer({ ...options, apiKey });
+          const transport = new SSEServerTransport("/messages", res);
+          const sessionId = transport.sessionId;
+
+          sessions.set(sessionId, { server, transport });
+
+          // Clean up on disconnect
+          res.on("close", () => {
+            sessions.delete(sessionId);
+            server.close().catch(() => {});
+          });
+
+          await server.connect(transport);
           return;
         }
 
         if (url.pathname === "/messages" && req.method === "POST") {
-          if (currentTransport) {
-            await currentTransport.handlePostMessage(req, res);
+          const sessionId = url.searchParams.get("sessionId");
+          const session = sessionId ? sessions.get(sessionId) : undefined;
+
+          if (session) {
+            await session.transport.handlePostMessage(req, res);
           } else {
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(
-              JSON.stringify({ error: "No active SSE connection" }),
+              JSON.stringify({
+                error: "INVALID_SESSION",
+                message: "Unknown or expired session. Reconnect to /sse.",
+              }),
             );
           }
           return;
@@ -186,4 +231,12 @@ export async function startServer(options: ServerOptions) {
       );
     });
   }
+}
+
+function extractBearerToken(req: IncomingMessage): string | null {
+  const auth = req.headers.authorization;
+  if (auth && auth.startsWith("Bearer ")) {
+    return auth.slice(7);
+  }
+  return null;
 }
