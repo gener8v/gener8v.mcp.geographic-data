@@ -153,6 +153,35 @@ export async function startServer(options: ServerOptions) {
           return;
         }
 
+        if (url.pathname === "/.well-known/mcp/server-card.json") {
+          const tools = getAllTools();
+          const resources = getAllResources();
+          const card = {
+            name: SERVER_NAME,
+            version: SERVER_VERSION,
+            displayName: "loc8n Geographic Data",
+            description:
+              "U.S. demographics, housing, mortgage, migration, and employment data from the Census Bureau, HUD, HMDA, and LEHD. 23 tools across 7 categories.",
+            iconUrl:
+              "https://gener8v-brand-assets.s3.us-east-2.amazonaws.com/logo/loc8n.png",
+            repository:
+              "https://github.com/gener8v/gener8v.mcp.geographic-data",
+            tools: tools.map((t) => ({
+              name: t.name,
+              description: t.description,
+              inputSchema: t.inputSchema,
+            })),
+            resources: resources.map((r) => ({
+              uri: r.uri,
+              name: r.name,
+              description: r.description,
+            })),
+          };
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify(card));
+          return;
+        }
+
         if (url.pathname === "/health") {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(
