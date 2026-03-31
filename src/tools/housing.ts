@@ -44,6 +44,13 @@ export const housingTools: ToolDefinition[] = [
       "Note: State-level queries return all ZIP-level FMR records within the state, which can be hundreds of records. " +
       "Use ZIP or county lookups when only a single area is needed. " +
       "Source: U.S. Dept. of Housing & Urban Development, Fair Market Rents.",
+    annotations: {
+      title: "Get Fair Market Rent",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
@@ -102,6 +109,13 @@ export const housingTools: ToolDefinition[] = [
       "Supports ZIP, county, and CBSA area types. State-level trends are not supported because " +
       "state queries return aggregated lists of ZIP-level records, not a single time series. " +
       "Source: U.S. Dept. of Housing & Urban Development, Fair Market Rents.",
+    annotations: {
+      title: "Get FMR Trend",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {

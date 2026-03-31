@@ -9,6 +9,8 @@ import {
   ListToolsRequestSchema,
   ListResourcesRequestSchema,
   ReadResourceRequestSchema,
+  ListPromptsRequestSchema,
+  GetPromptRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { mcpAuthRouter } from "@modelcontextprotocol/sdk/server/auth/router.js";
 import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
@@ -17,6 +19,7 @@ import { ApiClient } from "./api-client.js";
 import { AuthManager } from "./auth.js";
 import { getAllTools } from "./tools/index.js";
 import { getAllResources, handleResourceRead } from "./resources/index.js";
+import { allPrompts } from "./prompts.js";
 import { Loc8nOAuthProvider } from "./oauth/provider.js";
 import { InMemoryClientsStore, AuthorizationCodeStore, TokenStore } from "./oauth/stores.js";
 import { ManageClient } from "./oauth/manage-client.js";
@@ -47,6 +50,7 @@ export function createMcpServer(options: ServerOptions) {
       capabilities: {
         tools: {},
         resources: {},
+        prompts: {},
       },
     },
   );
@@ -60,6 +64,7 @@ export function createMcpServer(options: ServerOptions) {
       name: t.name,
       description: t.description,
       inputSchema: t.inputSchema,
+      annotations: t.annotations,
     })),
   }));
 
@@ -125,6 +130,30 @@ export function createMcpServer(options: ServerOptions) {
   server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
     const { uri } = request.params;
     return handleResourceRead(uri, apiClient, authManager);
+  });
+
+  // --- Prompt Handlers ---
+
+  server.setRequestHandler(ListPromptsRequestSchema, async () => ({
+    prompts: allPrompts.map((p) => ({
+      name: p.name,
+      description: p.description,
+      arguments: p.arguments,
+    })),
+  }));
+
+  server.setRequestHandler(GetPromptRequestSchema, async (request) => {
+    const { name, arguments: args } = request.params;
+    const prompt = allPrompts.find((p) => p.name === name);
+
+    if (!prompt) {
+      throw new Error(`Unknown prompt: ${name}`);
+    }
+
+    return {
+      description: prompt.description,
+      messages: prompt.getMessages(args ?? {}),
+    };
   });
 
   return { server, apiClient, authManager };
@@ -241,6 +270,7 @@ export async function startServer(options: ServerOptions) {
       displayName: "loc8n Geographic Data",
       description:
         "U.S. demographics, housing, mortgage, migration, and employment data from the Census Bureau, HUD, HMDA, and LEHD. 23 tools across 7 categories.",
+      homepage: "https://loc8n.com",
       iconUrl:
         "https://gener8v-brand-assets.s3.us-east-2.amazonaws.com/logo/loc8n.png",
       repository:

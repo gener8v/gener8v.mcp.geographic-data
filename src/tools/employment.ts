@@ -44,6 +44,13 @@ export const employmentTools: ToolDefinition[] = [
       "The 'perspective' parameter controls whether data reflects jobs physically " +
       "located in the area (workplace, WAC data — default) or jobs held by the " +
       "area's residents regardless of where they work (residence, RAC data).",
+    annotations: {
+      title: "Get Employment Data",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
@@ -112,6 +119,13 @@ export const employmentTools: ToolDefinition[] = [
       "Returns an array of yearly metrics (total jobs, industry mix, earnings, " +
       "age breakdown) ordered ascending by year. Use 'perspective' to choose " +
       "workplace (default) or residence.",
+    annotations: {
+      title: "Get Employment Trend",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
@@ -174,6 +188,13 @@ export const employmentTools: ToolDefinition[] = [
       "Compare employment data for multiple areas side by side (2-10 areas). " +
       "All geoids must share the same area type. Returns per-area metrics " +
       "including total jobs, industry mix, earnings, and age breakdown.",
+    annotations: {
+      title: "Compare Employment",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
@@ -256,6 +277,13 @@ export const employmentTools: ToolDefinition[] = [
       "Services). Note: this uses OD data with a coarser industry breakdown than " +
       "the 20-sector NAICS detail available in single-area employment summaries. " +
       "Not available at the tract level.",
+    annotations: {
+      title: "Get Commute Flows",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {

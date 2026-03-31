@@ -43,6 +43,13 @@ export const mortgageTools: ToolDefinition[] = [
       "Returns origination count, denial rate, median loan amount, median interest rate, loan purpose mix, " +
       "and loan type mix (conventional, FHA, VA, USDA). " +
       "Source: CFPB/FFIEC HMDA.",
+    annotations: {
+      title: "Get Mortgage Summary",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
@@ -99,6 +106,13 @@ export const mortgageTools: ToolDefinition[] = [
       "Returns an array of yearly summaries including origination count, denial rate, median loan amount, " +
       "median interest rate, and loan purpose/type breakdowns. " +
       "Source: CFPB/FFIEC HMDA.",
+    annotations: {
+      title: "Get Mortgage Trends",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
@@ -151,6 +165,13 @@ export const mortgageTools: ToolDefinition[] = [
       "Returns side-by-side summaries including origination count, denial rate, median loan amount, " +
       "and loan type/purpose breakdowns for each area. " +
       "Source: CFPB/FFIEC HMDA.",
+    annotations: {
+      title: "Compare Mortgage Data",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {

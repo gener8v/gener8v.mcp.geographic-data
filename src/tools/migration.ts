@@ -52,6 +52,13 @@ export const migrationTools: ToolDefinition[] = [
       "and net AGI (adjusted gross income in thousands of dollars). " +
       "Year is specified as a year pair (e.g., '2021-2022') representing tax filing year transitions. " +
       "Source: IRS Statistics of Income.",
+    annotations: {
+      title: "Get Migration Summary",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
@@ -113,6 +120,13 @@ export const migrationTools: ToolDefinition[] = [
       "Returns an array of flow records with FIPS, area name, returns, exemptions, and AGI (in thousands of dollars). " +
       "Some flow entries may be suppressed by the IRS for privacy when returns fall below the disclosure threshold. " +
       "Source: IRS Statistics of Income.",
+    annotations: {
+      title: "Get Migration Flows",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
@@ -222,6 +236,13 @@ export const migrationTools: ToolDefinition[] = [
       "Returns an array of yearly migration summaries sorted by year pair, each including net returns, " +
       "net exemptions, net AGI, and inflow/outflow breakdowns. AGI values are in thousands of dollars. " +
       "Source: IRS Statistics of Income.",
+    annotations: {
+      title: "Get Migration Trends",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {

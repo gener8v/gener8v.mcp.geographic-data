@@ -8,9 +8,18 @@ import { migrationTools } from "./migration.js";
 import { employmentTools } from "./employment.js";
 import { geocodingTools } from "./geocoding.js";
 
+export interface ToolAnnotations {
+  title?: string;
+  readOnlyHint?: boolean;
+  destructiveHint?: boolean;
+  idempotentHint?: boolean;
+  openWorldHint?: boolean;
+}
+
 export interface ToolDefinition {
   name: string;
   description: string;
+  annotations?: ToolAnnotations;
   inputSchema: {
     type: "object";
     properties: Record<string, unknown>;

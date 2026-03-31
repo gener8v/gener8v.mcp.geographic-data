@@ -141,6 +141,13 @@ const getDemographics: ToolDefinition = {
   name: "get_demographics",
   description:
     "Retrieve a full demographic profile (population, income, housing, education, employment, households) for a single geographic area such as a ZIP code, county, state, place, CBSA, census tract, or block group.",
+  annotations: {
+    title: "Get Demographics",
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   inputSchema: {
     type: "object",
     properties: {
@@ -191,6 +198,13 @@ const getDemographicsCategory: ToolDefinition = {
   name: "get_demographics_category",
   description:
     "Retrieve specific demographic categories (e.g. population, income, housing) for a geographic area. Use this instead of get_demographics when you only need a subset of categories to keep the response concise.",
+  annotations: {
+    title: "Get Demographics by Category",
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   inputSchema: {
     type: "object",
     properties: {
@@ -259,6 +273,13 @@ const getDemographicsTrend: ToolDefinition = {
   name: "get_demographics_trend",
   description:
     "Retrieve historical demographic data across multiple years for a single geographic area, useful for analysing population growth, income changes, or housing trends over time.",
+  annotations: {
+    title: "Get Demographics Trend",
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   inputSchema: {
     type: "object",
     properties: {
@@ -315,6 +336,13 @@ const compareDemographics: ToolDefinition = {
   name: "compare_demographics",
   description:
     "Compare demographics side by side for two to ten ZIP codes. Returns each ZIP's demographic profile plus summary comparison ranges (population, income, housing).",
+  annotations: {
+    title: "Compare Demographics",
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   inputSchema: {
     type: "object",
     properties: {

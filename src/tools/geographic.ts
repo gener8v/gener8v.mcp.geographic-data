@@ -51,6 +51,13 @@ const lookupZipCode: ToolDefinition = {
   name: "lookup_zip_code",
   description:
     "Look up full details for a single 5-digit US ZIP code, including city, state, county, timezone, coordinates, area codes, land/water area, and elevation.",
+  annotations: {
+    title: "Look Up ZIP Code",
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   inputSchema: {
     type: "object",
     properties: {
@@ -89,6 +96,13 @@ const searchZipCodesByCity: ToolDefinition = {
   name: "search_zip_codes_by_city",
   description:
     "Search for all ZIP codes in a given city and state. Returns the full list of matching ZIP codes with details.",
+  annotations: {
+    title: "Search ZIP Codes by City",
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   inputSchema: {
     type: "object",
     properties: {
@@ -137,6 +151,13 @@ const findZipCodesInRadius: ToolDefinition = {
   name: "find_zip_codes_in_radius",
   description:
     "Find all ZIP codes within a given radius of a center ZIP code. Returns each nearby ZIP with its distance from the center.",
+  annotations: {
+    title: "Find ZIP Codes in Radius",
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   inputSchema: {
     type: "object",
     properties: {
@@ -226,6 +247,13 @@ const calculateZipCodeDistance: ToolDefinition = {
   name: "calculate_zip_code_distance",
   description:
     "Calculate the distance between two ZIP codes using either the Haversine or Vincenty formula. Returns origin/destination details and the computed distance.",
+  annotations: {
+    title: "Calculate ZIP Code Distance",
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   inputSchema: {
     type: "object",
     properties: {
@@ -306,6 +334,13 @@ const searchAreas: ToolDefinition = {
   name: "search_areas",
   description:
     "Search for geographic areas by name across all boundary types (county, state, CBSA, census tract, ZIP). Uses trigram matching for fuzzy name search.",
+  annotations: {
+    title: "Search Geographic Areas",
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: true,
+  },
   inputSchema: {
     type: "object",
     properties: {

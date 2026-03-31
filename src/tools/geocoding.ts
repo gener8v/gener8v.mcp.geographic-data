@@ -16,6 +16,13 @@ export const geocodingTools: ToolDefinition[] = [
       "address, address components, confidence score, and provider name. " +
       "The optional 'country' parameter biases (but does not strictly filter) " +
       "results toward the given country.",
+    annotations: {
+      title: "Geocode Address",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
@@ -102,6 +109,13 @@ export const geocodingTools: ToolDefinition[] = [
     description:
       "Convert a latitude/longitude coordinate pair into a street address. " +
       "Returns the best-match formatted address, address components, and coordinates.",
+    annotations: {
+      title: "Reverse Geocode",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
     inputSchema: {
       type: "object",
       properties: {
