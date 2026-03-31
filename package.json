@@ -1,6 +1,6 @@
 {
   "name": "@gener8v/mcp-geographic-data",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for the loc8n Geographic Data API — query demographics, housing, mortgage, migration, and employment data from any MCP-compatible client",
   "type": "module",
   "bin": {
