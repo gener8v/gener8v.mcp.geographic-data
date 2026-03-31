@@ -199,15 +199,6 @@ mcp-geographic-data [options]
   --help, -h               Show help
 ```
 
-## Development
-
-```bash
-git clone https://github.com/gener8v/gener8v.mcp.geographic-data.git
-cd gener8v.mcp.geographic-data
-npm install
-npm run build
-```
-
 ## License
 
 MIT
