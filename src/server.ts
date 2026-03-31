@@ -212,27 +212,15 @@ export async function startServer(options: ServerOptions) {
             process.env.LOC8N_API_KEY ??
             "";
 
-          // Allow unauthenticated DELETE (session teardown)
-          if (req.method !== "DELETE" && !apiKey) {
-            res.writeHead(401, { "Content-Type": "application/json" });
-            res.end(
-              JSON.stringify({
-                error: "AUTH_ERROR",
-                message:
-                  "API key required. Pass ?apiKey= query parameter or Authorization: Bearer header.",
-              }),
-            );
-            return;
-          }
-
           const sessionId = req.headers["mcp-session-id"] as string | undefined;
           let transport = sessionId ? httpSessions.get(sessionId) : undefined;
 
           if (transport) {
             await transport.transport.handleRequest(req, res);
           } else if (req.method === "POST") {
-            // New session — create server + transport pair
-            const { server } = createMcpServer({ ...options, apiKey });
+            // New session — if no API key, create a discovery-only server
+            // that responds to initialize/tools/list but rejects tool calls.
+            const { server } = createMcpServer({ ...options, apiKey: apiKey || "discovery" });
             const newTransport = new StreamableHTTPServerTransport({
               sessionIdGenerator: () => randomUUID(),
               onsessioninitialized: (id) => {
@@ -247,6 +235,10 @@ export async function startServer(options: ServerOptions) {
 
             await server.connect(newTransport);
             await newTransport.handleRequest(req, res);
+          } else if (req.method === "DELETE") {
+            // Session teardown — allow without auth
+            res.writeHead(200);
+            res.end();
           } else {
             res.writeHead(400, { "Content-Type": "application/json" });
             res.end(
