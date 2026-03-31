@@ -32,8 +32,15 @@ Options:
   --help, -h               Show this help message
 
 Environment:
-  LOC8N_API_KEY            API key for the loc8n Geographic Data API (required)
-  LOC8N_API_BASE_URL       API base URL (default: https://api.loc8n.com)`);
+  LOC8N_API_KEY            API key for the loc8n Geographic Data API (required for stdio)
+  LOC8N_API_BASE_URL       API base URL (default: https://api.loc8n.com)
+
+OAuth (optional, enables OAuth discovery on HTTP transport):
+  MCP_SERVER_URL           Public URL of this MCP server (e.g. https://mcp.loc8n.com)
+  AUTH0_DOMAIN             Auth0 domain (e.g. auth.loc8n.com)
+  AUTH0_CLIENT_ID          Auth0 application client ID
+  AUTH0_CLIENT_SECRET      Auth0 application client secret
+  LOC8N_SERVICE_SECRET     Service secret for /manage/* API endpoints`);
       process.exit(0);
     }
   }
