@@ -1,6 +1,6 @@
 {
   "name": "@gener8v/mcp-geographic-data",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/gener8v/gener8v.mcp.geographic-data"
@@ -32,7 +32,7 @@
   ],
   "author": "GENER8V",
   "license": "MIT",
-  "mcpName": "io.github.gener8v/mcp-geographic-data",
+  "mcpName": "io.github.gener8v-thomas/mcp-geographic-data",
   "engines": {
     "node": ">=18.0.0"
   },
