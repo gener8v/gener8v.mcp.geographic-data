@@ -1,6 +1,10 @@
 {
   "name": "@gener8v/mcp-geographic-data",
-  "version": "0.1.1",
+  "version": "0.1.2",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gener8v/gener8v.mcp.geographic-data"
+  },
   "description": "MCP server for the loc8n Geographic Data API — query demographics, housing, mortgage, migration, and employment data from any MCP-compatible client",
   "type": "module",
   "bin": {
