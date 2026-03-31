@@ -1,6 +1,8 @@
+import { randomUUID } from "crypto";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -128,11 +130,15 @@ export async function startServer(options: ServerOptions) {
     const transport = new StdioServerTransport();
     await server.connect(transport);
   } else {
-    // SSE transport — multi-tenant: each connection gets its own
-    // MCP server instance keyed by the client's API key.
-    const sessions = new Map<
+    // Multi-tenant: each connection gets its own MCP server instance
+    // keyed by the client's API key.
+    const sseSessions = new Map<
       string,
       { server: Server; transport: SSEServerTransport }
+    >();
+    const httpSessions = new Map<
+      string,
+      { server: Server; transport: StreamableHTTPServerTransport }
     >();
 
     const httpServer = createServer(
@@ -141,10 +147,14 @@ export async function startServer(options: ServerOptions) {
 
         // CORS headers
         res.setHeader("Access-Control-Allow-Origin", "*");
-        res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+        res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
         res.setHeader(
           "Access-Control-Allow-Headers",
-          "Content-Type, Authorization",
+          "Content-Type, Authorization, Mcp-Session-Id",
+        );
+        res.setHeader(
+          "Access-Control-Expose-Headers",
+          "Mcp-Session-Id",
         );
 
         if (req.method === "OPTIONS") {
@@ -185,11 +195,71 @@ export async function startServer(options: ServerOptions) {
         if (url.pathname === "/health") {
           res.writeHead(200, { "Content-Type": "application/json" });
           res.end(
-            JSON.stringify({ status: "ok", sessions: sessions.size }),
+            JSON.stringify({
+              status: "ok",
+              sessions: sseSessions.size + httpSessions.size,
+            }),
           );
           return;
         }
 
+        // --- Streamable HTTP transport at /mcp ---
+        if (url.pathname === "/mcp") {
+          const apiKey =
+            url.searchParams.get("apiKey") ??
+            extractBearerToken(req) ??
+            options.apiKey ??
+            process.env.LOC8N_API_KEY ??
+            "";
+
+          // Allow unauthenticated DELETE (session teardown)
+          if (req.method !== "DELETE" && !apiKey) {
+            res.writeHead(401, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({
+                error: "AUTH_ERROR",
+                message:
+                  "API key required. Pass ?apiKey= query parameter or Authorization: Bearer header.",
+              }),
+            );
+            return;
+          }
+
+          const sessionId = req.headers["mcp-session-id"] as string | undefined;
+          let transport = sessionId ? httpSessions.get(sessionId) : undefined;
+
+          if (transport) {
+            await transport.transport.handleRequest(req, res);
+          } else if (req.method === "POST") {
+            // New session — create server + transport pair
+            const { server } = createMcpServer({ ...options, apiKey });
+            const newTransport = new StreamableHTTPServerTransport({
+              sessionIdGenerator: () => randomUUID(),
+              onsessioninitialized: (id) => {
+                httpSessions.set(id, { server, transport: newTransport });
+              },
+            });
+
+            newTransport.onclose = () => {
+              const sid = newTransport.sessionId;
+              if (sid) httpSessions.delete(sid);
+            };
+
+            await server.connect(newTransport);
+            await newTransport.handleRequest(req, res);
+          } else {
+            res.writeHead(400, { "Content-Type": "application/json" });
+            res.end(
+              JSON.stringify({
+                error: "INVALID_SESSION",
+                message: "Unknown or expired session. Send an initialize request first.",
+              }),
+            );
+          }
+          return;
+        }
+
+        // --- SSE transport at /sse (legacy) ---
         if (url.pathname === "/sse" && req.method === "GET") {
           // API key from query param, Authorization header, or env fallback
           const apiKey =
@@ -215,11 +285,11 @@ export async function startServer(options: ServerOptions) {
           const transport = new SSEServerTransport("/messages", res);
           const sessionId = transport.sessionId;
 
-          sessions.set(sessionId, { server, transport });
+          sseSessions.set(sessionId, { server, transport });
 
           // Clean up on disconnect
           res.on("close", () => {
-            sessions.delete(sessionId);
+            sseSessions.delete(sessionId);
             server.close().catch(() => {});
           });
 
@@ -229,7 +299,7 @@ export async function startServer(options: ServerOptions) {
 
         if (url.pathname === "/messages" && req.method === "POST") {
           const sessionId = url.searchParams.get("sessionId");
-          const session = sessionId ? sessions.get(sessionId) : undefined;
+          const session = sessionId ? sseSessions.get(sessionId) : undefined;
 
           if (session) {
             await session.transport.handlePostMessage(req, res);
@@ -254,6 +324,7 @@ export async function startServer(options: ServerOptions) {
       console.error(
         `MCP server (SSE) listening on http://localhost:${options.port}`,
       );
+      console.error(`  Streamable HTTP: http://localhost:${options.port}/mcp`);
       console.error(`  SSE endpoint: http://localhost:${options.port}/sse`);
       console.error(
         `  Health check: http://localhost:${options.port}/health`,
