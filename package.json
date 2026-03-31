@@ -28,6 +28,7 @@
   ],
   "author": "GENER8V",
   "license": "MIT",
+  "mcpName": "io.github.gener8v/mcp-geographic-data",
   "engines": {
     "node": ">=18.0.0"
   },

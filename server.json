@@ -1,0 +1,41 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.gener8v/mcp-geographic-data",
+  "title": "loc8n Geographic Data",
+  "description": "MCP server for the loc8n Geographic Data API — query demographics, housing, mortgage, migration, and employment data from any MCP-compatible client",
+  "repository": {
+    "url": "https://github.com/gener8v/gener8v.mcp.geographic-data",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@gener8v/mcp-geographic-data",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "LOC8N_API_KEY",
+          "description": "API key for the loc8n Geographic Data API",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "sse",
+      "url": "https://mcp.loc8n.com/sse",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer token — your loc8n API key",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

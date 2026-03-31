@@ -1,0 +1,17 @@
+# Smithery configuration file: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+
+configSchema:
+  type: object
+  required:
+    - loc8nApiKey
+  properties:
+    loc8nApiKey:
+      type: string
+      description: API key for the loc8n Geographic Data API
+
+commandFunction:
+  |-
+  (config) => ({ command: 'npx', args: ['-y', '@gener8v/mcp-geographic-data'], env: { LOC8N_API_KEY: config.loc8nApiKey } })
