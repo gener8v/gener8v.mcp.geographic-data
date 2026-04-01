@@ -289,11 +289,17 @@ export async function startServer(options: ServerOptions) {
         name: t.name,
         description: t.description,
         inputSchema: t.inputSchema,
+        annotations: t.annotations,
       })),
       resources: resources.map((r) => ({
         uri: r.uri,
         name: r.name,
         description: r.description,
+      })),
+      prompts: allPrompts.map((p) => ({
+        name: p.name,
+        description: p.description,
+        arguments: p.arguments,
       })),
     };
     res.json(card);
