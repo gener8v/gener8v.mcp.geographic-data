@@ -159,6 +159,16 @@ export function createMcpServer(options: ServerOptions) {
   return { server, apiClient, authManager };
 }
 
+/** Smithery sandbox — returns a server instance with mock config for scanning. */
+export function createSandboxServer() {
+  const { server } = createMcpServer({
+    transport: "stdio",
+    port: 3100,
+    apiKey: "sandbox",
+  });
+  return server;
+}
+
 function extractBearerToken(req: Request): string | null {
   const auth = req.headers.authorization;
   if (auth && auth.startsWith("Bearer ")) {
