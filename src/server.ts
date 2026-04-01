@@ -285,6 +285,16 @@ export async function startServer(options: ServerOptions) {
         "https://gener8v-brand-assets.s3.us-east-2.amazonaws.com/logo/loc8n.png",
       repository:
         "https://github.com/gener8v/gener8v.mcp.geographic-data",
+      configSchema: {
+        type: "object",
+        properties: {
+          loc8nApiKey: {
+            type: "string",
+            description:
+              "API key for the loc8n Geographic Data API. Optional when using OAuth authentication.",
+          },
+        },
+      },
       tools: tools.map((t) => ({
         name: t.name,
         description: t.description,
