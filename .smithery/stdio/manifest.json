@@ -1,0 +1,1076 @@
+{
+  "payload": {
+    "type": "stdio",
+    "runtime": "node",
+    "hasAuthAdapter": false,
+    "serverCard": {
+      "serverInfo": {
+        "name": "gener8v-geographic-data",
+        "version": "0.1.0"
+      },
+      "tools": [
+        {
+          "name": "lookup_zip_code",
+          "description": "Look up full details for a single 5-digit US ZIP code, including city, state, county, timezone, coordinates, area codes, land/water area, and elevation.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "zipCode": {
+                "type": "string",
+                "description": "The 5-digit ZIP code to look up (e.g., \"30301\")",
+                "pattern": "^[0-9]{5}$"
+              }
+            },
+            "required": [
+              "zipCode"
+            ]
+          },
+          "annotations": {
+            "title": "Look Up ZIP Code",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "search_zip_codes_by_city",
+          "description": "Search for all ZIP codes in a given city and state. Returns the full list of matching ZIP codes with details.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "city": {
+                "type": "string",
+                "description": "City name (e.g., \"Atlanta\")",
+                "minLength": 1
+              },
+              "state": {
+                "type": "string",
+                "description": "2-letter state abbreviation (e.g., \"GA\")",
+                "pattern": "^[A-Za-z]{2}$"
+              }
+            },
+            "required": [
+              "city",
+              "state"
+            ]
+          },
+          "annotations": {
+            "title": "Search ZIP Codes by City",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "find_zip_codes_in_radius",
+          "description": "Find all ZIP codes within a given radius of a center ZIP code. Returns each nearby ZIP with its distance from the center.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "zipCode": {
+                "type": "string",
+                "description": "Center ZIP code (5 digits)",
+                "pattern": "^[0-9]{5}$"
+              },
+              "radius": {
+                "type": "number",
+                "description": "Search radius (0.1 to 500)",
+                "minimum": 0.1,
+                "maximum": 500
+              },
+              "unit": {
+                "type": "string",
+                "description": "Distance unit",
+                "enum": [
+                  "miles",
+                  "kilometers"
+                ],
+                "default": "miles"
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Maximum number of results (1 to 500, default 100)",
+                "minimum": 1,
+                "maximum": 500,
+                "default": 100
+              },
+              "sort": {
+                "type": "string",
+                "description": "Sort order for results",
+                "enum": [
+                  "distance",
+                  "zip"
+                ],
+                "default": "distance"
+              }
+            },
+            "required": [
+              "zipCode",
+              "radius"
+            ]
+          },
+          "annotations": {
+            "title": "Find ZIP Codes in Radius",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "calculate_zip_code_distance",
+          "description": "Calculate the distance between two ZIP codes using either the Haversine or Vincenty formula. Returns origin/destination details and the computed distance.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "description": "Origin ZIP code (5 digits)",
+                "pattern": "^[0-9]{5}$"
+              },
+              "to": {
+                "type": "string",
+                "description": "Destination ZIP code (5 digits)",
+                "pattern": "^[0-9]{5}$"
+              },
+              "unit": {
+                "type": "string",
+                "description": "Distance unit",
+                "enum": [
+                  "miles",
+                  "kilometers",
+                  "meters",
+                  "feet",
+                  "nautical_miles"
+                ],
+                "default": "miles"
+              },
+              "method": {
+                "type": "string",
+                "description": "Calculation method",
+                "enum": [
+                  "haversine",
+                  "vincenty"
+                ],
+                "default": "haversine"
+              }
+            },
+            "required": [
+              "from",
+              "to"
+            ]
+          },
+          "annotations": {
+            "title": "Calculate ZIP Code Distance",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "search_areas",
+          "description": "Search for geographic areas by name across all boundary types (county, state, CBSA, census tract, ZIP). Uses trigram matching for fuzzy name search.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "query": {
+                "type": "string",
+                "description": "Search term -- name or partial ZIP code (minimum 2 characters)",
+                "minLength": 2
+              },
+              "types": {
+                "type": "array",
+                "description": "Restrict to specific boundary types",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "county",
+                    "state",
+                    "cbsa",
+                    "census_tract",
+                    "zip"
+                  ]
+                }
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Maximum number of results (1 to 50, default 20)",
+                "minimum": 1,
+                "maximum": 50,
+                "default": 20
+              }
+            },
+            "required": [
+              "query"
+            ]
+          },
+          "annotations": {
+            "title": "Search Geographic Areas",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_demographics",
+          "description": "Retrieve a full demographic profile (population, income, housing, education, employment, households) for a single geographic area such as a ZIP code, county, state, place, CBSA, census tract, or block group.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "zip",
+                  "county",
+                  "state",
+                  "place",
+                  "cbsa",
+                  "tract",
+                  "block_group"
+                ],
+                "description": "Geographic area type. Use 'zip' for ZIP codes, or a Census boundary type."
+              },
+              "area_code": {
+                "type": "string",
+                "description": "Area identifier: 5-digit ZIP, 2-digit state FIPS, 5-digit county FIPS, 11-digit tract GEOID, 12-digit block group GEOID, place FIPS, or CBSA code."
+              },
+              "data_year": {
+                "type": "integer",
+                "description": "Specific ACS data year (e.g. 2023). Omit for the most recent available year."
+              }
+            },
+            "required": [
+              "area_type",
+              "area_code"
+            ]
+          },
+          "annotations": {
+            "title": "Get Demographics",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_demographics_category",
+          "description": "Retrieve specific demographic categories (e.g. population, income, housing) for a geographic area. Use this instead of get_demographics when you only need a subset of categories to keep the response concise.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "zip",
+                  "county",
+                  "state",
+                  "place",
+                  "cbsa",
+                  "tract",
+                  "block_group"
+                ],
+                "description": "Geographic area type."
+              },
+              "area_code": {
+                "type": "string",
+                "description": "Area identifier (ZIP code, FIPS code, GEOID, or CBSA code)."
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "population",
+                    "income",
+                    "housing",
+                    "education",
+                    "employment",
+                    "households"
+                  ]
+                },
+                "description": "One or more demographic categories to retrieve: population, income, housing, education, employment, households."
+              },
+              "data_year": {
+                "type": "integer",
+                "description": "Specific ACS data year. Omit for the most recent available year."
+              }
+            },
+            "required": [
+              "area_type",
+              "area_code",
+              "categories"
+            ]
+          },
+          "annotations": {
+            "title": "Get Demographics by Category",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_demographics_trend",
+          "description": "Retrieve historical demographic data across multiple years for a single geographic area, useful for analysing population growth, income changes, or housing trends over time.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "zip",
+                  "county",
+                  "state",
+                  "place",
+                  "cbsa",
+                  "tract",
+                  "block_group"
+                ],
+                "description": "Geographic area type."
+              },
+              "area_code": {
+                "type": "string",
+                "description": "Area identifier (ZIP code, FIPS code, GEOID, or CBSA code)."
+              },
+              "start_year": {
+                "type": "integer",
+                "description": "First year of the range. Omit for the earliest available year."
+              },
+              "end_year": {
+                "type": "integer",
+                "description": "Last year of the range. Omit for the most recent available year."
+              }
+            },
+            "required": [
+              "area_type",
+              "area_code"
+            ]
+          },
+          "annotations": {
+            "title": "Get Demographics Trend",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "compare_demographics",
+          "description": "Compare demographics side by side for two to ten ZIP codes. Returns each ZIP's demographic profile plus summary comparison ranges (population, income, housing).",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "zip_codes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 2,
+                "maxItems": 10,
+                "description": "Two to ten 5-digit ZIP codes to compare."
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "population",
+                    "income",
+                    "housing",
+                    "education",
+                    "employment",
+                    "households"
+                  ]
+                },
+                "description": "Optional list of categories to include in the comparison."
+              },
+              "data_year": {
+                "type": "integer",
+                "description": "Specific ACS data year. Omit for the most recent available year."
+              }
+            },
+            "required": [
+              "zip_codes"
+            ]
+          },
+          "annotations": {
+            "title": "Compare Demographics",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_fair_market_rent",
+          "description": "Look up HUD Fair Market Rent (FMR) rates for a geographic area by ZIP code, county FIPS, CBSA/metro code, or state FIPS. Returns monthly rent estimates by bedroom count (efficiency through 4-bedroom). Note: State-level queries return all ZIP-level FMR records within the state, which can be hundreds of records. Use ZIP or county lookups when only a single area is needed. Source: U.S. Dept. of Housing & Urban Development, Fair Market Rents.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "zip",
+                  "county",
+                  "cbsa",
+                  "state"
+                ],
+                "description": "Geographic area type: zip (5-digit), county (5-digit FIPS), cbsa (CBSA/metro code), or state (2-digit FIPS)"
+              },
+              "area_code": {
+                "type": "string",
+                "description": "Area identifier — format depends on area_type"
+              },
+              "year": {
+                "type": "integer",
+                "description": "FMR fiscal year (default: latest available)"
+              }
+            },
+            "required": [
+              "area_type",
+              "area_code"
+            ]
+          },
+          "annotations": {
+            "title": "Get Fair Market Rent",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_fmr_trend",
+          "description": "Retrieve Fair Market Rent data across multiple years for a single area. Returns an array of yearly FMR records with rent values by bedroom count. Supports ZIP, county, and CBSA area types. State-level trends are not supported because state queries return aggregated lists of ZIP-level records, not a single time series. Source: U.S. Dept. of Housing & Urban Development, Fair Market Rents.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "zip",
+                  "county",
+                  "cbsa"
+                ],
+                "description": "Geographic area type: zip, county, or cbsa (state is not supported for trends)"
+              },
+              "area_code": {
+                "type": "string",
+                "description": "Area identifier — format depends on area_type"
+              },
+              "start_year": {
+                "type": "integer",
+                "description": "First year of the range (default: earliest available)"
+              },
+              "end_year": {
+                "type": "integer",
+                "description": "Last year of the range (default: latest available)"
+              }
+            },
+            "required": [
+              "area_type",
+              "area_code"
+            ]
+          },
+          "annotations": {
+            "title": "Get FMR Trend",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_mortgage_summary",
+          "description": "Retrieve the mortgage lending summary for a single geographic area (census tract, county, or state) from HMDA data. Returns origination count, denial rate, median loan amount, median interest rate, loan purpose mix, and loan type mix (conventional, FHA, VA, USDA). Source: CFPB/FFIEC HMDA.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "tract",
+                  "census_tract",
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level: tract (or census_tract), county, or state"
+              },
+              "geoid": {
+                "type": "string",
+                "description": "FIPS code — 11 digits for tract, 5 for county, 2 for state"
+              },
+              "year": {
+                "type": "integer",
+                "description": "HMDA data year (default: most recent available)"
+              }
+            },
+            "required": [
+              "area_type",
+              "geoid"
+            ]
+          },
+          "annotations": {
+            "title": "Get Mortgage Summary",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_mortgage_trends",
+          "description": "Retrieve multi-year mortgage lending data for a single area across all available HMDA years. Returns an array of yearly summaries including origination count, denial rate, median loan amount, median interest rate, and loan purpose/type breakdowns. Source: CFPB/FFIEC HMDA.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "tract",
+                  "census_tract",
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level: tract (or census_tract), county, or state"
+              },
+              "geoid": {
+                "type": "string",
+                "description": "FIPS code — 11 digits for tract, 5 for county, 2 for state"
+              }
+            },
+            "required": [
+              "area_type",
+              "geoid"
+            ]
+          },
+          "annotations": {
+            "title": "Get Mortgage Trends",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "compare_mortgage",
+          "description": "Compare mortgage lending metrics across 2-5 geographic areas for a single HMDA data year. All areas must be the same geographic level (tract, county, or state). Returns side-by-side summaries including origination count, denial rate, median loan amount, and loan type/purpose breakdowns for each area. Source: CFPB/FFIEC HMDA.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "tract",
+                  "census_tract",
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level (must be same for all areas): tract (or census_tract), county, or state"
+              },
+              "geoids": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "minItems": 2,
+                "maxItems": 5,
+                "description": "Array of 2-5 FIPS codes to compare"
+              },
+              "year": {
+                "type": "integer",
+                "description": "HMDA data year (default: most recent available)"
+              }
+            },
+            "required": [
+              "area_type",
+              "geoids"
+            ]
+          },
+          "annotations": {
+            "title": "Compare Mortgage Data",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_migration_summary",
+          "description": "Retrieve migration summary for a county or state showing aggregate inflows, outflows, and net migration. Returns net returns (positive = net in-migration, negative = net out-migration), net exemptions (proxy for people), and net AGI (adjusted gross income in thousands of dollars). Year is specified as a year pair (e.g., '2021-2022') representing tax filing year transitions. Source: IRS Statistics of Income.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "string",
+                "enum": [
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level: county or state"
+              },
+              "fips": {
+                "type": "string",
+                "description": "FIPS code — 5 digits for county, 2 for state"
+              },
+              "year": {
+                "type": "string",
+                "description": "Year pair (e.g., '2021-2022'). Defaults to most recent available."
+              }
+            },
+            "required": [
+              "level",
+              "fips"
+            ]
+          },
+          "annotations": {
+            "title": "Get Migration Summary",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_migration_flows",
+          "description": "Retrieve top inflow or outflow areas for a county or state, ranked by number of tax returns or AGI. Inflows show where people moved from (into this area); outflows show where people moved to (out of this area). Returns an array of flow records with FIPS, area name, returns, exemptions, and AGI (in thousands of dollars). Some flow entries may be suppressed by the IRS for privacy when returns fall below the disclosure threshold. Source: IRS Statistics of Income.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "string",
+                "enum": [
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level: county or state"
+              },
+              "fips": {
+                "type": "string",
+                "description": "FIPS code — 5 digits for county, 2 for state"
+              },
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "inflow",
+                  "outflow"
+                ],
+                "description": "Flow direction: inflow (moved into area) or outflow (moved out of area)"
+              },
+              "year": {
+                "type": "string",
+                "description": "Year pair (e.g., '2021-2022'). Defaults to most recent available."
+              },
+              "limit": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50,
+                "description": "Number of top flow areas to return (1-50, default: 10)"
+              },
+              "sort": {
+                "type": "string",
+                "enum": [
+                  "returns",
+                  "agi"
+                ],
+                "description": "Ranking metric: 'returns' (household count) or 'agi' (income). Default: 'returns'."
+              }
+            },
+            "required": [
+              "level",
+              "fips",
+              "direction"
+            ]
+          },
+          "annotations": {
+            "title": "Get Migration Flows",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_migration_trends",
+          "description": "Retrieve migration summary data across all available year pairs for a county or state. Returns an array of yearly migration summaries sorted by year pair, each including net returns, net exemptions, net AGI, and inflow/outflow breakdowns. AGI values are in thousands of dollars. Source: IRS Statistics of Income.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "level": {
+                "type": "string",
+                "enum": [
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level: county or state"
+              },
+              "fips": {
+                "type": "string",
+                "description": "FIPS code — 5 digits for county, 2 for state"
+              }
+            },
+            "required": [
+              "level",
+              "fips"
+            ]
+          },
+          "annotations": {
+            "title": "Get Migration Trends",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_employment",
+          "description": "Retrieve employment data for a single geographic area. Returns total jobs, industry mix by NAICS sector, earnings distribution, and age breakdown. The 'perspective' parameter controls whether data reflects jobs physically located in the area (workplace, WAC data — default) or jobs held by the area's residents regardless of where they work (residence, RAC data).",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "tract",
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level: tract, county, or state."
+              },
+              "geoid": {
+                "type": "string",
+                "description": "FIPS code for the area — 11 digits for tract, 5 for county, 2 for state."
+              },
+              "perspective": {
+                "type": "string",
+                "enum": [
+                  "workplace",
+                  "residence"
+                ],
+                "description": "workplace (jobs located in the area, default) or residence (jobs held by area residents)."
+              },
+              "year": {
+                "type": "integer",
+                "description": "Data year. Omit to use the most recent available year."
+              }
+            },
+            "required": [
+              "area_type",
+              "geoid"
+            ]
+          },
+          "annotations": {
+            "title": "Get Employment Data",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_employment_trend",
+          "description": "Retrieve employment data across all available years for a single area. Returns an array of yearly metrics (total jobs, industry mix, earnings, age breakdown) ordered ascending by year. Use 'perspective' to choose workplace (default) or residence.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "tract",
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level: tract, county, or state."
+              },
+              "geoid": {
+                "type": "string",
+                "description": "FIPS code for the area — 11 digits for tract, 5 for county, 2 for state."
+              },
+              "perspective": {
+                "type": "string",
+                "enum": [
+                  "workplace",
+                  "residence"
+                ],
+                "description": "workplace (jobs located in the area, default) or residence (jobs held by area residents)."
+              }
+            },
+            "required": [
+              "area_type",
+              "geoid"
+            ]
+          },
+          "annotations": {
+            "title": "Get Employment Trend",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "compare_employment",
+          "description": "Compare employment data for multiple areas side by side (2-10 areas). All geoids must share the same area type. Returns per-area metrics including total jobs, industry mix, earnings, and age breakdown.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "geoids": {
+                "type": "string",
+                "description": "Comma-separated FIPS codes to compare (2-10). All must match the specified area type."
+              },
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "tract",
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level shared by all geoids."
+              },
+              "perspective": {
+                "type": "string",
+                "enum": [
+                  "workplace",
+                  "residence"
+                ],
+                "description": "workplace (default) or residence."
+              },
+              "year": {
+                "type": "integer",
+                "description": "Data year. Omit to use the most recent available year."
+              }
+            },
+            "required": [
+              "geoids",
+              "area_type"
+            ]
+          },
+          "annotations": {
+            "title": "Compare Employment",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "get_commute_flows",
+          "description": "Retrieve commute flow (origin-destination) data for a county or state. Shows where workers come from (inbound) or where residents commute to (outbound). Returns top flow pairs with job counts and a 3-supersector industry breakdown (Goods Producing, Trade/Transport/Utilities, All Other Services). Note: this uses OD data with a coarser industry breakdown than the 20-sector NAICS detail available in single-area employment summaries. Not available at the tract level.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "area_type": {
+                "type": "string",
+                "enum": [
+                  "county",
+                  "state"
+                ],
+                "description": "Geographic level: county or state (tract is not supported for flows)."
+              },
+              "geoid": {
+                "type": "string",
+                "description": "FIPS code — 5 digits for county, 2 for state."
+              },
+              "direction": {
+                "type": "string",
+                "enum": [
+                  "inbound",
+                  "outbound"
+                ],
+                "description": "inbound = where workers come from; outbound = where residents commute to."
+              },
+              "year": {
+                "type": "integer",
+                "description": "Data year. Omit to use the most recent available year."
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Number of top flow pairs to return (1-100, default 25)."
+              },
+              "min_jobs": {
+                "type": "integer",
+                "description": "Minimum job count threshold to include a flow pair (default 0)."
+              }
+            },
+            "required": [
+              "area_type",
+              "geoid",
+              "direction"
+            ]
+          },
+          "annotations": {
+            "title": "Get Commute Flows",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "geocode_address",
+          "description": "Convert a street address or place name into geographic coordinates. Returns up to 'limit' candidate results with coordinates, formatted address, address components, confidence score, and provider name. The optional 'country' parameter biases (but does not strictly filter) results toward the given country.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "address": {
+                "type": "string",
+                "description": "The address or place name to geocode (minimum 3 characters)."
+              },
+              "limit": {
+                "type": "integer",
+                "description": "Maximum number of results to return (1-10, default 5)."
+              },
+              "country": {
+                "type": "string",
+                "description": "2-letter uppercase ISO 3166-1 country code to bias results (e.g., 'US'). Biases but does not strictly filter — results from other countries may appear."
+              }
+            },
+            "required": [
+              "address"
+            ]
+          },
+          "annotations": {
+            "title": "Geocode Address",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        },
+        {
+          "name": "reverse_geocode",
+          "description": "Convert a latitude/longitude coordinate pair into a street address. Returns the best-match formatted address, address components, and coordinates.",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "latitude": {
+                "type": "number",
+                "description": "Latitude in decimal degrees (-90 to 90)."
+              },
+              "longitude": {
+                "type": "number",
+                "description": "Longitude in decimal degrees (-180 to 180)."
+              }
+            },
+            "required": [
+              "latitude",
+              "longitude"
+            ]
+          },
+          "annotations": {
+            "title": "Reverse Geocode",
+            "readOnlyHint": true,
+            "destructiveHint": false,
+            "idempotentHint": true,
+            "openWorldHint": true
+          }
+        }
+      ],
+      "resources": [
+        {
+          "name": "Demographics Available Years",
+          "uri": "data://demographics/available-years",
+          "description": "Available data years for demographics data (American Community Survey 5-Year Estimates). Use this to validate year parameters before calling demographics tools.",
+          "mimeType": "application/json"
+        },
+        {
+          "name": "Fair Market Rent Available Years",
+          "uri": "data://fmr/available-years",
+          "description": "Available data years for HUD Fair Market Rent data. Use this to validate year parameters before calling FMR tools.",
+          "mimeType": "application/json"
+        },
+        {
+          "name": "Mortgage Available Years",
+          "uri": "data://mortgage/available-years",
+          "description": "Available data years for HMDA mortgage data. Use this to validate year parameters before calling mortgage tools.",
+          "mimeType": "application/json"
+        },
+        {
+          "name": "Migration Available Years",
+          "uri": "data://migration/available-years",
+          "description": "Available year pairs for IRS SOI migration data. Migration data uses year pairs (e.g., 2021-2022) representing moves between consecutive tax filing years.",
+          "mimeType": "application/json"
+        },
+        {
+          "name": "Employment Available Years",
+          "uri": "data://employment/available-years",
+          "description": "Available data years for LODES employment data. Requires Business tier or above (employment:read permission).",
+          "mimeType": "application/json"
+        },
+        {
+          "name": "Tier & Permission Model",
+          "uri": "data://tiers",
+          "description": "Platform tier definitions including permissions, rate limits, and features. Use this to understand what data each subscription tier can access.",
+          "mimeType": "application/json"
+        },
+        {
+          "name": "Current API Key Context",
+          "uri": "data://auth/context",
+          "description": "Information about the current API key's tier, permissions, and rate limits. Use this to check what the current key can access before invoking tools.",
+          "mimeType": "application/json"
+        }
+      ],
+      "prompts": [
+        {
+          "name": "analyze-area",
+          "description": "Generate a comprehensive analysis of a geographic area covering demographics, housing costs, mortgage lending, employment, and migration patterns.",
+          "arguments": [
+            {
+              "name": "area_type",
+              "description": "Geographic area type: zip, county, state, cbsa, tract, or place",
+              "required": true
+            },
+            {
+              "name": "area_code",
+              "description": "Area identifier: 5-digit ZIP, FIPS code, GEOID, or CBSA code",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "compare-areas",
+          "description": "Compare two or more geographic areas across demographics, housing, and economic indicators.",
+          "arguments": [
+            {
+              "name": "areas",
+              "description": "Comma-separated list of area identifiers to compare (e.g., '30301,30302,30303' for ZIP codes, or '13121,13089' for counties)",
+              "required": true
+            },
+            {
+              "name": "area_type",
+              "description": "Geographic area type shared by all areas: zip, county, state, tract",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "market-analysis",
+          "description": "Analyze the real estate market for a geographic area using housing costs, mortgage trends, demographics, and migration data.",
+          "arguments": [
+            {
+              "name": "area_type",
+              "description": "Geographic area type: zip, county, state, or cbsa",
+              "required": true
+            },
+            {
+              "name": "area_code",
+              "description": "Area identifier: ZIP code, FIPS code, or CBSA code",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    "source": {
+      "commit": "dbb1a32767f090d2db7b9f987e6e769c3bf97f51",
+      "branch": "main"
+    }
+  },
+  "artifacts": {
+    "bundle": "server.mcpb"
+  }
+}

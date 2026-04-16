@@ -1,0 +1,153 @@
+{
+  "manifest_version": "0.2",
+  "name": "gener8v-geographic-data",
+  "version": "0.1.0",
+  "description": "MCP Server",
+  "author": {
+    "name": "Thomas Eaves"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "index.cjs",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/index.cjs"
+      ],
+      "env": {}
+    }
+  },
+  "tools": [
+    {
+      "name": "lookup_zip_code",
+      "description": "Look up full details for a single 5-digit US ZIP code, including city, state, county, timezone, coordinates, area codes, land/water area, and elevation."
+    },
+    {
+      "name": "search_zip_codes_by_city",
+      "description": "Search for all ZIP codes in a given city and state. Returns the full list of matching ZIP codes with details."
+    },
+    {
+      "name": "find_zip_codes_in_radius",
+      "description": "Find all ZIP codes within a given radius of a center ZIP code. Returns each nearby ZIP with its distance from the center."
+    },
+    {
+      "name": "calculate_zip_code_distance",
+      "description": "Calculate the distance between two ZIP codes using either the Haversine or Vincenty formula. Returns origin/destination details and the computed distance."
+    },
+    {
+      "name": "search_areas",
+      "description": "Search for geographic areas by name across all boundary types (county, state, CBSA, census tract, ZIP). Uses trigram matching for fuzzy name search."
+    },
+    {
+      "name": "get_demographics",
+      "description": "Retrieve a full demographic profile (population, income, housing, education, employment, households) for a single geographic area such as a ZIP code, county, state, place, CBSA, census tract, or block group."
+    },
+    {
+      "name": "get_demographics_category",
+      "description": "Retrieve specific demographic categories (e.g. population, income, housing) for a geographic area. Use this instead of get_demographics when you only need a subset of categories to keep the response concise."
+    },
+    {
+      "name": "get_demographics_trend",
+      "description": "Retrieve historical demographic data across multiple years for a single geographic area, useful for analysing population growth, income changes, or housing trends over time."
+    },
+    {
+      "name": "compare_demographics",
+      "description": "Compare demographics side by side for two to ten ZIP codes. Returns each ZIP's demographic profile plus summary comparison ranges (population, income, housing)."
+    },
+    {
+      "name": "get_fair_market_rent",
+      "description": "Look up HUD Fair Market Rent (FMR) rates for a geographic area by ZIP code, county FIPS, CBSA/metro code, or state FIPS. Returns monthly rent estimates by bedroom count (efficiency through 4-bedroom). Note: State-level queries return all ZIP-level FMR records within the state, which can be hundreds of records. Use ZIP or county lookups when only a single area is needed. Source: U.S. Dept. of Housing & Urban Development, Fair Market Rents."
+    },
+    {
+      "name": "get_fmr_trend",
+      "description": "Retrieve Fair Market Rent data across multiple years for a single area. Returns an array of yearly FMR records with rent values by bedroom count. Supports ZIP, county, and CBSA area types. State-level trends are not supported because state queries return aggregated lists of ZIP-level records, not a single time series. Source: U.S. Dept. of Housing & Urban Development, Fair Market Rents."
+    },
+    {
+      "name": "get_mortgage_summary",
+      "description": "Retrieve the mortgage lending summary for a single geographic area (census tract, county, or state) from HMDA data. Returns origination count, denial rate, median loan amount, median interest rate, loan purpose mix, and loan type mix (conventional, FHA, VA, USDA). Source: CFPB/FFIEC HMDA."
+    },
+    {
+      "name": "get_mortgage_trends",
+      "description": "Retrieve multi-year mortgage lending data for a single area across all available HMDA years. Returns an array of yearly summaries including origination count, denial rate, median loan amount, median interest rate, and loan purpose/type breakdowns. Source: CFPB/FFIEC HMDA."
+    },
+    {
+      "name": "compare_mortgage",
+      "description": "Compare mortgage lending metrics across 2-5 geographic areas for a single HMDA data year. All areas must be the same geographic level (tract, county, or state). Returns side-by-side summaries including origination count, denial rate, median loan amount, and loan type/purpose breakdowns for each area. Source: CFPB/FFIEC HMDA."
+    },
+    {
+      "name": "get_migration_summary",
+      "description": "Retrieve migration summary for a county or state showing aggregate inflows, outflows, and net migration. Returns net returns (positive = net in-migration, negative = net out-migration), net exemptions (proxy for people), and net AGI (adjusted gross income in thousands of dollars). Year is specified as a year pair (e.g., '2021-2022') representing tax filing year transitions. Source: IRS Statistics of Income."
+    },
+    {
+      "name": "get_migration_flows",
+      "description": "Retrieve top inflow or outflow areas for a county or state, ranked by number of tax returns or AGI. Inflows show where people moved from (into this area); outflows show where people moved to (out of this area). Returns an array of flow records with FIPS, area name, returns, exemptions, and AGI (in thousands of dollars). Some flow entries may be suppressed by the IRS for privacy when returns fall below the disclosure threshold. Source: IRS Statistics of Income."
+    },
+    {
+      "name": "get_migration_trends",
+      "description": "Retrieve migration summary data across all available year pairs for a county or state. Returns an array of yearly migration summaries sorted by year pair, each including net returns, net exemptions, net AGI, and inflow/outflow breakdowns. AGI values are in thousands of dollars. Source: IRS Statistics of Income."
+    },
+    {
+      "name": "get_employment",
+      "description": "Retrieve employment data for a single geographic area. Returns total jobs, industry mix by NAICS sector, earnings distribution, and age breakdown. The 'perspective' parameter controls whether data reflects jobs physically located in the area (workplace, WAC data — default) or jobs held by the area's residents regardless of where they work (residence, RAC data)."
+    },
+    {
+      "name": "get_employment_trend",
+      "description": "Retrieve employment data across all available years for a single area. Returns an array of yearly metrics (total jobs, industry mix, earnings, age breakdown) ordered ascending by year. Use 'perspective' to choose workplace (default) or residence."
+    },
+    {
+      "name": "compare_employment",
+      "description": "Compare employment data for multiple areas side by side (2-10 areas). All geoids must share the same area type. Returns per-area metrics including total jobs, industry mix, earnings, and age breakdown."
+    },
+    {
+      "name": "get_commute_flows",
+      "description": "Retrieve commute flow (origin-destination) data for a county or state. Shows where workers come from (inbound) or where residents commute to (outbound). Returns top flow pairs with job counts and a 3-supersector industry breakdown (Goods Producing, Trade/Transport/Utilities, All Other Services). Note: this uses OD data with a coarser industry breakdown than the 20-sector NAICS detail available in single-area employment summaries. Not available at the tract level."
+    },
+    {
+      "name": "geocode_address",
+      "description": "Convert a street address or place name into geographic coordinates. Returns up to 'limit' candidate results with coordinates, formatted address, address components, confidence score, and provider name. The optional 'country' parameter biases (but does not strictly filter) results toward the given country."
+    },
+    {
+      "name": "reverse_geocode",
+      "description": "Convert a latitude/longitude coordinate pair into a street address. Returns the best-match formatted address, address components, and coordinates."
+    }
+  ],
+  "prompts": [
+    {
+      "name": "analyze-area",
+      "description": "Generate a comprehensive analysis of a geographic area covering demographics, housing costs, mortgage lending, employment, and migration patterns.",
+      "arguments": [
+        "area_type",
+        "area_code"
+      ],
+      "text": "Generate a comprehensive analysis of a geographic area covering demographics, housing costs, mortgage lending, employment, and migration patterns.: ${arguments.area_type}, ${arguments.area_code}"
+    },
+    {
+      "name": "compare-areas",
+      "description": "Compare two or more geographic areas across demographics, housing, and economic indicators.",
+      "arguments": [
+        "areas",
+        "area_type"
+      ],
+      "text": "Compare two or more geographic areas across demographics, housing, and economic indicators.: ${arguments.areas}, ${arguments.area_type}"
+    },
+    {
+      "name": "market-analysis",
+      "description": "Analyze the real estate market for a geographic area using housing costs, mortgage trends, demographics, and migration data.",
+      "arguments": [
+        "area_type",
+        "area_code"
+      ],
+      "text": "Analyze the real estate market for a geographic area using housing costs, mortgage trends, demographics, and migration data.: ${arguments.area_type}, ${arguments.area_code}"
+    }
+  ],
+  "compatibility": {
+    "platforms": [
+      "darwin",
+      "win32",
+      "linux"
+    ],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}

@@ -3,3 +3,7 @@ dist/
 .env
 .env.local
 *.tsbuildinfo
+
+# recovery-state: secrets
+.mcpregistry_github_token
+.mcpregistry_registry_token
